@@ -38,9 +38,10 @@ export async function createInvoice(formData: FormData) {
   `;
   } catch (error) {
     console.log("🚀 ~ createInvoice ~ error", error);
-    return {
-      message: "Database Error: Failed to Create Invoice.",
-    };
+    // todo: handle the ts error because of the return type
+    // return {
+    //   message: "Database Error: Failed to Create Invoice.",
+    // };
   }
   revalidatePath("/dashboard/invoices");
   redirect("/dashboard/invoices");
@@ -58,7 +59,7 @@ export async function updateInvoice(id: string, formData: FormData) {
   try {
     await sql`
         UPDATE invoices
-        SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+        SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}, date= ${date}
         WHERE id = ${id}
       `;
   } catch (error) {
