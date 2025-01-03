@@ -70,12 +70,24 @@ export async function createInvoice(prevState: State, formData: FormData) {
   redirect("/dashboard/invoices");
 }
 
-export async function updateInvoice(id: string, formData: FormData) {
-  const { customerId, amount, status } = UpdateInvoice.parse({
+export async function updateInvoice(
+  prevState: State,
+  formData: FormData,
+  id: string
+) {
+  const validatedFields = UpdateInvoice.safeParse({
     customerId: formData.get("customerId"),
     amount: formData.get("amount"),
     status: formData.get("status"),
   });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Missing Fields. Failed to Update Invoice.",
+    };
+  }
+  const { customerId, amount, status } = validatedFields.data;
 
   const amountInCents = amount * 100;
   const date = new Date().toISOString().split("T")[0];
@@ -88,7 +100,7 @@ export async function updateInvoice(id: string, formData: FormData) {
   } catch (error) {
     console.log("🚀 ~ updateInvoice ~ error:", error);
     // todo: handle the ts error because of the return type
-    // return { message: "Database Error: Failed to Update Invoice." };
+    return { message: "Database Error: Failed to Update Invoice." };
   }
   revalidatePath("/dashboard/invoices");
   redirect("/dashboard/invoices");
